@@ -393,7 +393,7 @@ function downloadCard() {
     const renderScale = isMobile ? 2 : (window.devicePixelRatio > 1 ? window.devicePixelRatio : 2);
 
     html2canvas(card, {
-      backgroundColor: null,
+      backgroundColor: '#0a0608', // Match website base background to fix transparency/tint issues
       scale: renderScale,
       useCORS: true,
       logging: false,

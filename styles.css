@@ -1332,9 +1332,11 @@ body:has(input:hover) .cursor {
 }
 
 .output-photo {
-  width: 100%;
+  max-width: 100%;
   max-height: 400px;
-  object-fit: contain;
+  width: auto;
+  height: auto;
+  margin: 0 auto;
   display: block;
   border-radius: 16px;
 }
