@@ -385,24 +385,61 @@ function downloadCard() {
   const originalDisplay = actions.style.display;
   actions.style.display = 'none';
 
+  // Reduce scale on mobile to prevent memory limits / crashes in html2canvas
+  const isMobile = window.innerWidth <= 768;
+  const renderScale = isMobile ? 1 : 2;
+
   html2canvas(card, {
     backgroundColor: '#100c10',
-    scale: 2, // High resolution
+    scale: renderScale, // High resolution on desktop, normal on mobile
     useCORS: true,
     logging: false
   }).then(canvas => {
     actions.style.display = originalDisplay;
     
-    const link = document.createElement('a');
-    link.download = `LoveCard_${Date.now()}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-    showToast('Love Card downloaded! ♥');
+    // Use toBlob instead of toDataURL to handle large images better on mobile
+    canvas.toBlob(function(blob) {
+      if (!blob) {
+        showToast('Oops, could not create image file.');
+        return;
+      }
+      
+      // If Web Share API is available and we're on mobile, try to share it natively
+      // This is often more reliable on iOS/Android for saving/sharing images
+      if (isMobile && navigator.canShare && navigator.canShare({ files: [new File([blob], 'card.png', { type: blob.type })] })) {
+        const file = new File([blob], `LoveCard_${Date.now()}.png`, { type: blob.type });
+        navigator.share({
+          files: [file],
+          title: 'Love Card',
+          text: 'Here is a beautiful love card for you!'
+        }).then(() => {
+          showToast('Love Card shared! ♥');
+        }).catch(err => {
+          // If user cancels share or it fails, fallback to standard download
+          triggerDownload(blob);
+        });
+      } else {
+        triggerDownload(blob);
+      }
+    }, 'image/png');
   }).catch(err => {
     actions.style.display = originalDisplay;
     showToast('Oops, something went wrong.');
-    console.error(err);
+    console.error('html2canvas error:', err);
   });
+}
+
+function triggerDownload(blob) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.download = `LoveCard_${Date.now()}.png`;
+  link.href = url;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  setTimeout(() => URL.revokeObjectURL(url), 100);
+  showToast('Love Card downloaded! ♥');
 }
 
 function typeMessage(el, text) {
