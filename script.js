@@ -11,6 +11,7 @@ window.addEventListener('load', () => {
   }, 1800);
 });
 
+
 /* ========== CUSTOM CURSOR ========== */
 const cursor = document.getElementById('cursor');
 const cursorTrail = document.getElementById('cursorTrail');
@@ -250,6 +251,66 @@ const messages = {
   ],
 };
 
+/* ========== AI MESSAGE GENERATOR ========== */
+function generateMockAIMessage(name1, name2, occasion) {
+  const intros = [
+    `{name1}, there are no words perfect enough, but I will try. `,
+    `Every time I think of you, {name1}, my world feels a little brighter. `,
+    `They say time changes things, but my feelings for you only grow deeper, {name1}. `,
+    `{name1}, you are the poetry I never knew how to write. `
+  ];
+  
+  const bodies = {
+    'Anniversary': [
+      `Another beautiful year has passed, and you remain my greatest adventure. Every day with you is a gift I cherish. `,
+      `Looking back, every moment spent with you has been a treasure. You make every year better than the last. `
+    ],
+    'Birthday': [
+      `On this special day, the world was blessed with you. May this year bring you as much joy as you bring me. `,
+      `Celebrating you today reminds me of how lucky I am. You deserve all the stars in the sky tonight. `
+    ],
+    'Valentine\'s Day': [
+      `You are my everyday Valentine, the one who holds my heart completely. `,
+      `Love is just a word until someone comes along and gives it meaning. You gave it meaning for me. `
+    ],
+    'Proposal': [
+      `I want to spend all my tomorrows with you. You are my forever. `,
+      `Life with you is a beautiful dream I never want to wake up from. Will you make it my reality forever? `
+    ],
+    'Good Morning': [
+      `Waking up and knowing you are mine is the best way to start the day. `,
+      `The sun is out, but you are the true light of my life today and always. `
+    ],
+    'Good Night': [
+      `As the stars come out, my thoughts drift to you. Sleep well, my love. `,
+      `Close your eyes and know that you are deeply loved, tonight and every night. `
+    ],
+    'Missing You': [
+      `The distance means so little when someone means so much. I miss your smile. `,
+      `Every second without you feels like a lifetime. I can't wait to hold you again. `
+    ],
+    'Just Because': [
+      `I just wanted to remind you how incredibly special you are to me, today and always. `,
+      `No special occasion, just my heart reminding me of how much I love you. `
+    ]
+  };
+
+  const endings = [
+    `Forever yours, {name2}.`,
+    `With all my heart, {name2}.`,
+    `Endlessly, {name2}.`,
+    `Love always, {name2}.`
+  ];
+
+  const randomIntro = intros[Math.floor(Math.random() * intros.length)];
+  const bodyPool = bodies[occasion] || bodies['Just Because'];
+  const randomBody = bodyPool[Math.floor(Math.random() * bodyPool.length)];
+  const randomEnding = endings[Math.floor(Math.random() * endings.length)];
+
+  let msg = randomIntro + randomBody + randomEnding;
+  return msg.replace(/{name1}/g, name1).replace(/{name2}/g, name2);
+}
+
 let currentMessageIndex = 0;
 
 async function generateMessage() {
@@ -260,19 +321,41 @@ async function generateMessage() {
   const outputMessage = document.getElementById('outputMessage');
   const outputNames = document.getElementById('outputNames');
   const outputOccTag = document.getElementById('outputOccTag');
+  
+  const photoUpload = document.getElementById('photoUpload');
+  const outputPhotoContainer = document.getElementById('outputPhotoContainer');
+  const outputPhoto = document.getElementById('outputPhoto');
 
   btn.classList.add('loading');
   btn.querySelector('.btn-gen-text').textContent = 'Crafting your message...';
 
   outputArea.classList.remove('visible');
+  outputPhotoContainer.classList.remove('visible');
 
   await new Promise(r => setTimeout(r, 1400));
 
-  const pool = messages[selectedOccasion] || messages['Just Because'];
-  let msg = pool[currentMessageIndex % pool.length];
-  currentMessageIndex++;
+  // Process image if uploaded
+  if (photoUpload && photoUpload.files && photoUpload.files[0]) {
+    const file = photoUpload.files[0];
+    const reader = new FileReader();
+    
+    const imageLoadPromise = new Promise(resolve => {
+      reader.onload = function(e) {
+        outputPhoto.src = e.target.result;
+        outputPhotoContainer.classList.add('visible');
+        resolve();
+      };
+    });
+    
+    reader.readAsDataURL(file);
+    await imageLoadPromise;
+  } else {
+    outputPhoto.src = '';
+    outputPhotoContainer.classList.remove('visible');
+  }
 
-  msg = msg.replace(/{name1}/g, name1).replace(/{name2}/g, name2);
+  // Generate dynamic AI message
+  const msg = generateMockAIMessage(name1, name2, selectedOccasion);
 
   outputOccTag.textContent = selectedOccasion;
   outputNames.textContent = `${name1} & ${name2}`;
@@ -290,6 +373,36 @@ async function generateMessage() {
   setTimeout(() => {
     outputArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 300);
+}
+
+/* ========== DOWNLOAD AS IMAGE ========== */
+function downloadCard() {
+  const card = document.getElementById('outputCard');
+  if (!card) return;
+  
+  // Hide actions temporarily for clean capture
+  const actions = card.querySelector('.output-actions');
+  const originalDisplay = actions.style.display;
+  actions.style.display = 'none';
+
+  html2canvas(card, {
+    backgroundColor: '#100c10',
+    scale: 2, // High resolution
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    actions.style.display = originalDisplay;
+    
+    const link = document.createElement('a');
+    link.download = `LoveCard_${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('Love Card downloaded! ♥');
+  }).catch(err => {
+    actions.style.display = originalDisplay;
+    showToast('Oops, something went wrong.');
+    console.error(err);
+  });
 }
 
 function typeMessage(el, text) {

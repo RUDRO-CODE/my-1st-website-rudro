@@ -1262,3 +1262,79 @@ body:has(input:hover) .cursor {
   background: rgba(255, 107, 157, 0.25);
   color: var(--text);
 }
+
+/* ========== NEW FEATURES: FILE UPLOAD & MEMORY CARD ========== */
+.file-upload-group {
+  text-align: left;
+  margin-bottom: 2.5rem;
+}
+
+.custom-file-input {
+  width: 100%;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  background: var(--surface);
+  border: 1px dashed rgba(255,107,157,0.3);
+  border-radius: 12px;
+  padding: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-out);
+}
+
+.custom-file-input:hover {
+  border-color: var(--rose);
+  background: rgba(255,107,157,0.05);
+}
+
+.custom-file-input::-webkit-file-upload-button {
+  visibility: hidden;
+  display: none;
+}
+.custom-file-input::before {
+  content: 'Choose File';
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(255,107,157,0.2), rgba(196,69,105,0.15));
+  border: 1px solid var(--rose);
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  outline: none;
+  white-space: nowrap;
+  cursor: pointer;
+  color: var(--rose);
+  font-weight: 500;
+  margin-right: 1rem;
+  transition: all 0.3s;
+}
+
+.custom-file-input:hover::before {
+  background: var(--rose);
+  color: white;
+}
+
+.output-photo-container {
+  display: none;
+  width: 100%;
+  margin-bottom: 2rem;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255, 107, 157, 0.2);
+  animation: photoFadeIn 1s ease-out forwards;
+}
+
+.output-photo-container.visible {
+  display: block;
+}
+
+.output-photo {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
+}
+
+@keyframes photoFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}

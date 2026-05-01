@@ -177,6 +177,11 @@
             <button class="occ-btn" data-occ="Just Because">Just Because</button>
           </div>
 
+          <div class="input-group file-upload-group">
+            <label>Add a Memory (Optional)</label>
+            <input type="file" id="photoUpload" accept="image/*" class="custom-file-input" />
+          </div>
+
           <!-- Generate -->
           <button class="btn-generate" id="generateBtn" onclick="generateMessage()">
             <span class="btn-gen-text">Generate My Message</span>
@@ -190,10 +195,17 @@
       <!-- Output -->
       <div class="output-area" id="outputArea">
         <div class="output-card" id="outputCard">
+          <div class="output-photo-container" id="outputPhotoContainer">
+            <img id="outputPhoto" src="" alt="Memory" />
+          </div>
           <div class="output-occasion-tag" id="outputOccTag"></div>
           <div class="output-names" id="outputNames"></div>
           <div class="output-message" id="outputMessage"></div>
           <div class="output-actions">
+            <button class="out-btn" onclick="downloadCard()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Download
+            </button>
             <button class="out-btn" onclick="copyOutput()">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="1.5"/></svg>
               Copy
@@ -260,6 +272,7 @@
     <p class="footer-copy">Crafted with ♥ for every love story.</p>
   </footer>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
