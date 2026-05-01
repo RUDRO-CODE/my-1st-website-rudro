@@ -1312,15 +1312,19 @@ body:has(input:hover) .cursor {
   color: white;
 }
 
+/* ===== FIX START ===== */
 .output-photo-container {
   display: none;
   width: 100%;
   margin-bottom: 2rem;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   border: 1px solid rgba(255, 107, 157, 0.2);
   animation: photoFadeIn 1s ease-out forwards;
+  background: transparent;
+  position: relative;
+  z-index: 10;
 }
 
 .output-photo-container.visible {
@@ -1330,9 +1334,11 @@ body:has(input:hover) .cursor {
 .output-photo {
   width: 100%;
   max-height: 400px;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
+  border-radius: 16px;
 }
+/* ===== FIX END ===== */
 
 @keyframes photoFadeIn {
   from { opacity: 0; transform: scale(0.95); }

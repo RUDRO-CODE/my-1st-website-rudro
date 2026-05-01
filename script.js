@@ -375,7 +375,7 @@ async function generateMessage() {
   }, 300);
 }
 
-/* ========== DOWNLOAD AS IMAGE ========== */
+// ===== FIX START =====
 function downloadCard() {
   const card = document.getElementById('outputCard');
   if (!card) return;
@@ -385,48 +385,58 @@ function downloadCard() {
   const originalDisplay = actions.style.display;
   actions.style.display = 'none';
 
-  // Reduce scale on mobile to prevent memory limits / crashes in html2canvas
-  const isMobile = window.innerWidth <= 768;
-  const renderScale = isMobile ? 1 : 2;
+  const photo = document.getElementById('outputPhoto');
+  
+  const performCapture = () => {
+    // Ensure high quality capture while respecting device capabilities
+    const isMobile = window.innerWidth <= 768;
+    const renderScale = isMobile ? 2 : (window.devicePixelRatio > 1 ? window.devicePixelRatio : 2);
 
-  html2canvas(card, {
-    backgroundColor: '#100c10',
-    scale: renderScale, // High resolution on desktop, normal on mobile
-    useCORS: true,
-    logging: false
-  }).then(canvas => {
-    actions.style.display = originalDisplay;
-    
-    // Use toBlob instead of toDataURL to handle large images better on mobile
-    canvas.toBlob(function(blob) {
-      if (!blob) {
-        showToast('Oops, could not create image file.');
-        return;
-      }
+    html2canvas(card, {
+      backgroundColor: null,
+      scale: renderScale,
+      useCORS: true,
+      logging: false,
+      allowTaint: true
+    }).then(canvas => {
+      actions.style.display = originalDisplay;
       
-      // If Web Share API is available and we're on mobile, try to share it natively
-      // This is often more reliable on iOS/Android for saving/sharing images
-      if (isMobile && navigator.canShare && navigator.canShare({ files: [new File([blob], 'card.png', { type: blob.type })] })) {
-        const file = new File([blob], `LoveCard_${Date.now()}.png`, { type: blob.type });
-        navigator.share({
-          files: [file],
-          title: 'Love Card',
-          text: 'Here is a beautiful love card for you!'
-        }).then(() => {
-          showToast('Love Card shared! ♥');
-        }).catch(err => {
-          // If user cancels share or it fails, fallback to standard download
+      // Use toBlob instead of toDataURL to handle large images better on mobile
+      canvas.toBlob(function(blob) {
+        if (!blob) {
+          showToast('Oops, could not create image file.');
+          return;
+        }
+        
+        // If Web Share API is available and we're on mobile, try to share it natively
+        if (isMobile && navigator.canShare && navigator.canShare({ files: [new File([blob], 'card.png', { type: blob.type })] })) {
+          const file = new File([blob], `LoveCard_${Date.now()}.png`, { type: blob.type });
+          navigator.share({
+            files: [file],
+            title: 'Love Card',
+            text: 'Here is a beautiful love card for you!'
+          }).then(() => {
+            showToast('Love Card shared! ♥');
+          }).catch(err => {
+            triggerDownload(blob);
+          });
+        } else {
           triggerDownload(blob);
-        });
-      } else {
-        triggerDownload(blob);
-      }
-    }, 'image/png');
-  }).catch(err => {
-    actions.style.display = originalDisplay;
-    showToast('Oops, something went wrong.');
-    console.error('html2canvas error:', err);
-  });
+        }
+      }, 'image/png');
+    }).catch(err => {
+      actions.style.display = originalDisplay;
+      showToast('Oops, something went wrong.');
+      console.error('html2canvas error:', err);
+    });
+  };
+
+  // Ensure image is fully loaded before capture to prevent rendering issues
+  if (photo && photo.src && !photo.complete) {
+    photo.onload = performCapture;
+  } else {
+    performCapture();
+  }
 }
 
 function triggerDownload(blob) {
@@ -441,6 +451,7 @@ function triggerDownload(blob) {
   setTimeout(() => URL.revokeObjectURL(url), 100);
   showToast('Love Card downloaded! ♥');
 }
+// ===== FIX END =====
 
 function typeMessage(el, text) {
   return new Promise(resolve => {
